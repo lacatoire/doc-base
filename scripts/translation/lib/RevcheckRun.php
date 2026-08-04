@@ -33,6 +33,8 @@ class RevcheckRun
     public array $filesUntranslated = [];
     public array $filesNotInEn = [];
     public array $filesWip = [];
+    public array $filesDoNotTranslate = [];
+    public array $filesXmlBroken = [];
 
     public array $qaList = [];
     public RevcheckData $revData;
@@ -83,11 +85,30 @@ class RevcheckRun
             if ( $target == null )
             {
                 if ( RevcheckIgnore::byMark( "{$this->sourceDir}/{$source->file}" ) )
+                {
+                    $source->status = RevcheckStatus::DoNotTranslate;
+                    $this->filesDoNotTranslate[] = $source;
+                    $this->addData( $source , null );
                     continue;
+                }
 
                 $source->status = RevcheckStatus::Untranslated;
                 $this->filesUntranslated[] = $source;
                 $this->addData( $source , null );
+                continue;
+            }
+
+            // XmlBroken
+            //
+            // Checked before the revtag, as a broken file makes every other
+            // check on it unreliable, revtag parsing included.
+
+            if ( $target->xmlError != "" )
+            {
+                $source->status = RevcheckStatus::XmlBroken;
+                $source->xmlError = $target->xmlError;
+                $this->filesXmlBroken[] = $source;
+                $this->addData( $source , $target->revtag );
                 continue;
             }
 
@@ -168,6 +189,7 @@ class RevcheckRun
         $file->status = $info->status;
         $file->hashLast = $info->hashLast;
         $file->hashDiff = $info->hashDiff;
+        $file->xmlError = $info->xmlError;
 
         $this->revData->addFile( $info->file , $file );
 

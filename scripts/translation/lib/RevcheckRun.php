@@ -100,8 +100,10 @@ class RevcheckRun
 
             // XmlBroken
             //
-            // Checked before the revtag, as a broken file makes every other
-            // check on it unreliable, revtag parsing included.
+            // Checked before the revtag, as a file that does not parse is
+            // the more pressing problem. The revtag is still carried over:
+            // libxml recovers, so the comments are read even from a
+            // misaligned file, and an empty one has nothing to read anyway.
 
             if ( $target->xmlError != "" )
             {

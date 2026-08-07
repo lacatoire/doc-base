@@ -39,11 +39,18 @@ class RevtagParser
             // Files are parsed here anyway, so reuse the errors already
             // collected by XmlUtil, instead of loading everything again.
             //
-            // Only .xml files are checked. Entity files are DTD fragments,
-            // never standalone XML, so they always fail to parse as such.
+            // Everything is XML in principle. The exception is the entity
+            // files still written as DTD fragments, that never parse as
+            // standalone XML: they are not .xml and hold entity
+            // declarations. Only those few are read back to be told apart,
+            // while still hot in the OS cache.
 
             if ( str_ends_with( $entry->file , '.xml' ) == false )
-                continue;
+            {
+                $contents = file_get_contents( $lang . '/' . $entry->file );
+                if ( str_contains( $contents , '<!ENTITY' ) )
+                    continue;
+            }
 
             $error = XmlUtil::$lastErrors[0] ?? null;
             if ( $error != null )

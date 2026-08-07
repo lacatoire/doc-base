@@ -309,7 +309,7 @@ $acd = array( // {{{
     'HISTORY_FILE' => 'yes',
     'LIBXML_CHECK' => 'yes',
     'USE_BROKEN_TRANSLATION_FILENAME' => 'yes',
-    'OUTPUT_FILENAME' => $srcdir . '/.manual.xml',
+    'OUTPUT_FILENAME' => $srcdir . '/temp/.manual.xml',
     'GENERATE' => 'no',
     'STDERR_TO_STDOUT' => 'no',
     'TRANSLATION_ONLY_INCL_BEGIN' => '',
@@ -1270,7 +1270,7 @@ function php_history()
     echo 'PhD history:';
 
     $lang_mod_file = "{$ac['rootdir']}/{$ac['LANG_BASE_DIR']}/fileModHistory.php";
-    $doc_base_mod_file = __DIR__ . "/fileModHistory.php";
+    $doc_base_mod_file = __DIR__ . "/temp/fileModHistory.php";
 
     $history_file = null;
     if (file_exists($lang_mod_file)) {
@@ -1339,7 +1339,7 @@ function phd_sources()
         $sources_elem->appendChild($el);
     }
     echo " saving,";
-    if ($dom->save($ac['srcdir'] . '/sources.xml')) {
+    if ($dom->save($ac['srcdir'] . '/temp/sources.xml')) {
         echo " done.\n";
     } else {
         echo " fail!\n";
@@ -1388,7 +1388,7 @@ function phd_version()
     }
     echo ' saving,';
 
-    if ($dom->save($ac['srcdir'] . '/version.xml')) {
+    if ($dom->save($ac['srcdir'] . '/temp/version.xml')) {
         echo " done.\n";
     } else {
         echo " fail!\n";

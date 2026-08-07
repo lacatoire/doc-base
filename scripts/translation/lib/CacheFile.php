@@ -21,7 +21,7 @@ require_once __DIR__ . '/all.php';
 
 class CacheFile
 {
-    const CACHE_DIR = __DIR__ . '/../.cache';
+    const CACHE_DIR = __DIR__ . '/../../../temp/translation-cache';
 
     private string $filename;
 

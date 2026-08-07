@@ -235,6 +235,6 @@ class RevcheckRun
     private function saveRevcheckData()
     {
         $json = json_encode( $this->revData , JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT );
-        file_put_contents( __DIR__ . "/../../../.revcheck.json" , $json );
+        file_put_contents( __DIR__ . "/../../../temp/revcheck.json" , $json );
     }
 }

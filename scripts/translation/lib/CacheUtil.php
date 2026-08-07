@@ -21,7 +21,7 @@ require_once __DIR__ . '/all.php';
 
 class CacheUtil
 {
-    const CACHE_DIR = __DIR__ . '/../.cache';
+    const CACHE_DIR = __DIR__ . '/../../../temp/translation-cache';
 
     public static function load( string $path , string $file )
     {

@@ -93,6 +93,42 @@ Files without revision tags in expected format will fail to generate pretty
 diffs on [Translation status](https://doc.php.net/revcheck.php) website or
 locally generated `revcheck.php` status pages.
 
+## check-structure.php
+
+`doc-base/scripts/translation/check-structure.php` compares the block
+structure of translated files with `doc-en`: the elements and their nesting,
+not the prose they contain. An extra `<note>`, a list turned into a
+paragraph, or a `<refsect1>` that lost its `role` are reported.
+
+Unlike the `qaxml-*` scripts above, each file is compared with `doc-en` **at
+the revision the file declares to mirror**, read from its revision tag. A
+file waiting for a sync is therefore compared with the English it actually
+translated, and produces no alert. That makes this script usable as a
+blocking check on a pull request, where alerts have to be actionable, while
+the `qaxml-*` scripts cover the whole tree and rely on their ignore lists.
+
+File names are read from the command line, or from standard input when none
+are given, which is how a CI job hands over the files a pull request touches.
+Paths are relative to the translation directory:
+
+```
+git diff --name-only "$BASE"...HEAD -- '*.xml' \
+  | php doc-base/scripts/translation/check-structure.php --lang=fr
+```
+
+The script accepts a `--github` option, to report alerts as GitHub Actions
+annotations instead of plain text, so that they land on the right file of the
+pull request.
+
+It also accepts a `--messages=` option, pointing to a PHP file that returns
+an array of messages, for translations that would rather alert their
+contributors in their own language. Missing entries fall back to English.
+
+Files marked with `<?do-not-translate?>`, and files without a revision tag,
+are skipped. `qaxml-revtag.php` is the script that reports the latter.
+
+Exit status is non zero when at least one difference is found.
+
 ## Suggested execution
 
 The first execution of these scripts may generate an inordinate amount of
@@ -112,6 +148,13 @@ php doc-base/scripts/translation/qaxml-entities.php
 php doc-base/scripts/translation/qaxml-pi.php
 php doc-base/scripts/translation/qaxml-tags.php --detail
 php doc-base/scripts/translation/qaxml-ws.php
+```
+
+Structural comparison of the files changed by a pull request:
+
+```
+git diff --name-only "$BASE"...HEAD -- '*.xml' \
+  | php doc-base/scripts/translation/check-structure.php --lang=$LANG
 ```
 
 Tags where is expected **no** translations:

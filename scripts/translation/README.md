@@ -120,10 +120,6 @@ The script accepts a `--github` option, to report alerts as GitHub Actions
 annotations instead of plain text, so that they land on the right file of the
 pull request.
 
-It also accepts a `--messages=` option, pointing to a PHP file that returns
-an array of messages, for translations that would rather alert their
-contributors in their own language. Missing entries fall back to English.
-
 Files marked with `<?do-not-translate?>`, and files without a revision tag,
 are skipped. `qaxml-revtag.php` is the script that reports the latter.
 

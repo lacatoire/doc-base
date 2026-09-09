@@ -35,18 +35,10 @@ const TEXT_CONTAINERS = [
     'screen' , 'seg' , 'segtitle' , 'synopsis' ,
 ];
 
-const DEFAULT_MESSAGES = [
-    'invalid'   => '<<INVALID>>' ,
-    'none'      => '(none)' ,
-    'violation' => 'structure differs from doc-en (EN: %s | translation: %s) [blocks EN=%d translation=%d]' ,
-    'summary'   => "checked=%d divergent=%d\n" ,
-];
-
 $argv     = new ArgvParser( $argv );
 $argv->consume( position: 0 ); // script name
 $help     = $argv->consume( equals: "--help" ) ?? $argv->consume( equals: "-h" );
 $lang     = $argv->consume( prefix: "--lang=" );
-$msgFile  = $argv->consume( prefix: "--messages=" );
 $github   = $argv->consume( equals: "--github" );
 $files    = [];
 foreach ( $argv->residual() as $arg )
@@ -59,7 +51,7 @@ $argv->complete();
 
 if ( $help !== null )
 {
-    fwrite( STDERR , "Usage: check-structure.php [--lang=xx] [--messages=file] [--github] [files...]\n\n" );
+    fwrite( STDERR , "Usage: check-structure.php [--lang=xx] [--github] [files...]\n\n" );
     fwrite( STDERR , "Reads file names from the command line, or from standard input when none\n" );
     fwrite( STDERR , "are given. Paths are relative to the translation directory.\n\n" );
     fwrite( STDERR , "See https://github.com/php/doc-base/tree/master/scripts/translation#readme for more info.\n" );
@@ -67,7 +59,6 @@ if ( $help !== null )
 }
 
 $lang     = requireLang( $lang );
-$messages = loadMessages( $msgFile );
 $files    = $files === [] ? readPathsFromStdin() : $files;
 
 // -- Setup -----------------------------------------------------------------
@@ -89,33 +80,6 @@ function requireLang( ?string $lang ) : string
     }
 
     return trim( file_get_contents( $file ) );
-}
-
-/**
- * Message catalog. A translation may hand its own file over --messages=, so
- * that contributors read alerts in their language. The file returns an array
- * with any of the DEFAULT_MESSAGES keys; missing keys fall back to English.
- */
-function loadMessages( ?string $filename ) : array
-{
-    if ( $filename === null || $filename === '' )
-        return DEFAULT_MESSAGES;
-
-    if ( ! is_file( $filename ) )
-    {
-        fwrite( STDERR , "Message file not found: $filename\n" );
-        exit( 1 );
-    }
-
-    $messages = require $filename;
-
-    if ( ! is_array( $messages ) )
-    {
-        fwrite( STDERR , "Message file must return an array: $filename\n" );
-        exit( 1 );
-    }
-
-    return array_merge( DEFAULT_MESSAGES , $messages );
 }
 
 /**
@@ -189,12 +153,12 @@ function collectSkeleton( DOMElement $element , string $depth , array & $skeleto
  * Undeclared entities are left to XmlUtil::loadText(), which recovers from
  * them; both sides go through the same loader, so the treatment is symmetric.
  */
-function buildSkeleton( string $xml , array $messages ) : array
+function buildSkeleton( string $xml ) : array
 {
     $document = XmlUtil::loadText( $xml );
 
     if ( $document->documentElement === null )
-        return [ $messages[ 'invalid' ] ];
+        return [ '<<INVALID>>' ];
 
     $skeleton = [];
     collectSkeleton( $document->documentElement , '' , $skeleton );
@@ -226,7 +190,7 @@ function docEnFileAtRevision( string $hash , string $file ) : ?string
  * First position where two skeletons differ, as [ enLine , targetLine ], or
  * null when they are identical. A missing line is reported as "(none)".
  */
-function firstDivergence( array $enSkeleton , array $targetSkeleton , array $messages ) : ?array
+function firstDivergence( array $enSkeleton , array $targetSkeleton ) : ?array
 {
     $length = max( count( $enSkeleton ) , count( $targetSkeleton ) );
 
@@ -237,8 +201,8 @@ function firstDivergence( array $enSkeleton , array $targetSkeleton , array $mes
 
         if ( $enLine !== $targetLine )
             return [
-                trim( $enSkeleton[ $i ] ?? $messages[ 'none' ] ) ,
-                trim( $targetSkeleton[ $i ] ?? $messages[ 'none' ] ) ,
+                trim( $enSkeleton[ $i ] ?? '(none)' ) ,
+                trim( $targetSkeleton[ $i ] ?? '(none)' ) ,
             ];
     }
 
@@ -281,9 +245,9 @@ foreach ( $files as $file )
 
     $checked++;
 
-    $enSkeleton     = buildSkeleton( $enXml , $messages );
-    $targetSkeleton = buildSkeleton( $targetXml , $messages );
-    $divergence     = firstDivergence( $enSkeleton , $targetSkeleton , $messages );
+    $enSkeleton     = buildSkeleton( $enXml );
+    $targetSkeleton = buildSkeleton( $targetXml );
+    $divergence     = firstDivergence( $enSkeleton , $targetSkeleton );
 
     if ( $divergence === null )
         continue;
@@ -298,7 +262,10 @@ foreach ( $files as $file )
 
 foreach ( $violations as [ $file , $enLine , $targetLine , $enCount , $targetCount ] )
 {
-    $message = sprintf( $messages[ 'violation' ] , $enLine , $targetLine , $enCount , $targetCount );
+    $message = sprintf(
+        'structure differs from doc-en (EN: %s | translation: %s) [blocks EN=%d translation=%d]' ,
+        $enLine , $targetLine , $enCount , $targetCount
+    );
 
     // Under GitHub Actions the path must be relative to the repository being
     // annotated, so that the alert lands on the right file of the pull request.
@@ -309,6 +276,6 @@ foreach ( $violations as [ $file , $enLine , $targetLine , $enCount , $targetCou
         printf( "%s/%s: %s\n" , $lang , $file , $message );
 }
 
-fprintf( STDERR , $messages[ 'summary' ] , $checked , count( $violations ) );
+fprintf( STDERR , "checked=%d divergent=%d\n" , $checked , count( $violations ) );
 
 exit( $violations === [] ? 0 : 1 );

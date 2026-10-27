@@ -63,6 +63,15 @@ const KNOWN_FILE_FAILURES = [
     'language/types/string.xml',
     'reference/strings/functions/echo.xml',
 
+    // Those need to be fixed
+    // Do not run this script on programs which are not PHP
+    'reference/yaf/yaf-loader.xml',
+    'reference/yaf/yaf_application/construct.xml',
+    'reference/yaf/yaf_router/addconfig.xml',
+    // Uses ...
+    'reference/ev/evwatcher/keepalive.xml',
+    // Gets out of the CDATA to does a reference via methodname tag
+    'reference/event/eventhttpconnection/setclosecallback.xml',
     // ignore for now but should be easy fix
     'reference/mbstring/functions/mb-decode-numericentity.xml',
     'reference/mbstring/functions/mb-encode-numericentity.xml',

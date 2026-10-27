@@ -89,7 +89,7 @@ assert( LOOSE_SKIP_REVCHECK || ! LOOSE_SKIP_REVCHECK );
 
 /* # FIXED_SKIP_REVCHECK
 
-Consider the output of: git log --oneline -- reference/array/functions/array-map.xml
+Consider the output of: git log --oneline -- reference/ds/ds.deque.xml
 ```
 4d17 [skip-revcheck] Convert class markup to be compatible with DocBook 5.2
 6cec [skip-revcheck] Normalize &Constants; and &Methods; usage (#2703)

@@ -39,6 +39,8 @@ const SKIP_FILE = [
      * alias detection doesn't find it... so add it here */
     'reference/oci8/oldaliases/ocifetchinto.xml',
     /* This page uses <xi:include> tags to include the docs from the OO version */
+    'reference/parallel/functions/parallel.run.xml',
+    /* This page uses <xi:include> tags to include the docs from the OO version */
     'reference/pdo/pdo/connect.xml',
     /* These pages use <xi:include> tags to include the docs from the interface version */
     'reference/dom/domcharacterdata/after.xml',
